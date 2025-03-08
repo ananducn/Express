@@ -49,7 +49,7 @@ app.post("/leafNinja", (req, res) => {
 });
 
 // to get data on all ninjas
-app.get("/leaf", (req, res) => {
+app.get("/leafNinja", (req, res) => {
   res.status(200).send(ninjaData);
 });
 
