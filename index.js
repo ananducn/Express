@@ -1,8 +1,11 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
 
 import express from "express";
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000
+import logger from "./logger.js";
+import morgan from "morgan";
 
 // app.get("/", (req, res) => {
 //   res.send("Hello anime fans!");
@@ -16,11 +19,29 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
+const morganFormat = ":method :url :status :response-time ms";
+
+app.use(
+  morgan(morganFormat, {
+    stream: {
+      write: (message) => {
+        const logObject = {
+          method: message.split(" ")[0],
+          url: message.split(" ")[1],
+          status: message.split(" ")[2],
+          responseTime: message.split(" ")[3],
+        };
+        logger.info(JSON.stringify(logObject));
+      },
+    },
+  })
+);
+
 let ninjaData = [];
 let nextId = 1;
 
 // Add a new ninja data
-app.post("/leaf", (req, res) => {
+app.post("/leafNinja", (req, res) => {
   const { name, clan } = req.body;
   const newNinja = { id: nextId++, name, clan };
   ninjaData.push(newNinja);
@@ -33,7 +54,7 @@ app.get("/leaf", (req, res) => {
 });
 
 // to get data of a particular ninja using id
-app.get("/leaf/:id", (req, res) => {
+app.get("/leafNinja/:id", (req, res) => {
   const ninja = ninjaData.find((n) => n.id === parseInt(req.params.id));
   if (!ninja) {
     return res.status(404).send("Ninja not found");
@@ -43,7 +64,7 @@ app.get("/leaf/:id", (req, res) => {
 
 // update a ninja data
 
-app.put("/leaf/:id", (req, res) => {
+app.put("/leafNinja/:id", (req, res) => {
   const ninja = ninjaData.find((n) => n.id === parseInt(req.params.id));
   if (!ninja) {
     return res.status(404).send("Ninja not found");
@@ -56,7 +77,7 @@ app.put("/leaf/:id", (req, res) => {
 
 // delete a ninja data
 
-app.delete("/leaf/:id", (req, res) => {
+app.delete("/leafNinja/:id", (req, res) => {
   const index = ninjaData.findIndex((n) => n.id === parseInt(req.params.id));
   if (index === -1) {
     return res.status(404).send("Ninja not found");
